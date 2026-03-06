@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Virtual Clothing Store</title>
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+
+<body>
+  <a-scene background="color: #111">
+
+    <!-- ============= ALL ASSETS IN ONE SINGLE BLOCK ============= -->
+    <a-assets timeout="15000">
+      <a-asset-item id="manModel"   src="t-pose_cleaned_male_scan.glb"></a-asset-item>
+      <a-asset-item id="greenShirt" src="green_shirt_hood_scan_medpoly.glb"></a-asset-item>
+      <a-asset-item id="yellowPolo" src="realistic_yellow_polo_shirt.glb"></a-asset-item>
+      <a-asset-item id="pant"       src="pant_5.glb"></a-asset-item>
+      <a-assets timeout="10000">
+      <a-asset-item id="manModel" src="t-pose_cleaned_male_scan.glb"></a-asset-item>
+    </a-assets>
+      <video id="tryOnVideo" src="" autoplay loop muted playsinline crossorigin="anonymous"></video>
+    </a-assets>
+
+    <!-- ===================== LIGHTING ===================== -->
+    <a-light type="ambient"     color="#ffffff" intensity="0.7"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="1.2" position="2 6 3" cast-shadow="true"></a-light>
+    <a-light type="directional" color="#aaddff" intensity="0.5" position="-4 3 2"></a-light>
+    <a-light type="point"       color="#ffe8c0" intensity="1.2" distance="7" position="3 3 -2"></a-light>
+    <a-light type="point"       color="#ffffff" intensity="0.9" distance="6" position="-3 3 -3"></a-light>
+    <!-- ===================================================== -->
+
+    <!-- Store Floor -->
+    <a-plane position="0 -1 -5" rotation="-90 0 0" width="20" height="20" color="#333" roughness="0.9"></a-plane>
+
+    <!-- Back Wall -->
+    <a-plane position="0 3 -10" rotation="0 0 0" width="20" height="10" color="#1a1a2e"></a-plane>
+
+    <!-- Store Title -->
+    <a-text value="Virtual Clothing Store"
+      position="0 4.5 -6" align="center" color="#f0e6d3" width="12">
+    </a-text>
+
+    <!-- ============= CLOTHING RACK FRAME ============= -->
+    <a-cylinder position="-3 1.5 -4.5"  radius="0.05" height="4"   rotation="0 0 90" color="#aaaaaa"></a-cylinder>
+    <a-cylinder position="-5 0.25 -4.5" radius="0.05" height="1.5" color="#aaaaaa"></a-cylinder>
+    <a-cylinder position="-1 0.25 -4.5" radius="0.05" height="1.5" color="#aaaaaa"></a-cylinder>
+
+    <!-- ============= CLOTHING ITEM 1: Green Hoodie ============= -->
+<a-entity id="greenShirtModel"
+  gltf-model="#greenShirt"
+  position="-8 1.5 -4.5"
+  rotation="0 0 0"
+  scale="1 1 1">
+</a-entity>
+
+<a-text value="Green Hoodie\n$29.99"
+  position="-4.5 0 -4.0"
+  align="center" color="#ffffff" width="4">
+</a-text>
+
+
+<!-- ============= CLOTHING ITEM 2: Yellow Polo ============= -->
+<a-entity id="yellowPoloModel"
+  gltf-model="#yellowPolo"
+  position="-3.3 -0.68 -4.5"
+  rotation="0 0 0"
+  scale="1 1 1">
+</a-entity>
+
+<a-text value="Yellow Polo\n$59.99"
+  position="-3.3 0 -4.0"
+  align="center" color="#ffffff" width="4">
+</a-text>
+
+
+<!-- ============= CLOTHING ITEM 3: Pants ============= -->
+<a-entity id="pantModel"
+  gltf-model="#pant"
+  position="-2.1.0 0.57 -7.87"
+  rotation="0 180 0"
+  scale="0.85 0.85 0.85 ">
+</a-entity>
+
+<a-text value="Black Pants\n$39.99"
+  position="-2.1 0 -4.0"
+  align="center" color="#ffffff" width="4">
+</a-text>
+    <!-- ============= 3D HUMAN MODEL ============= -->
+    
+
+    <a-entity
+      id="humanModel"
+      gltf-model="#manModel"
+      position="3 1 -2"
+      rotation="0 -20 0"
+      scale="2.5 2.5 2.5"
+      animation-mixer="clip: *; loop: repeat">
+    </a-entity>
+
+    <!-- ============= TRY-ON SCREEN ============= -->
+    <a-box   position="0 2 -8.1" width="8.6" height="4.6" depth="0.1" color="#222222"></a-box>
+    <a-video src="Screenshot 2026-03-06 151648.png"   position="0 2 -8" width="8" height="4"></a-video>
+    <a-text value="Virtual Try-On Screen"
+      position="0 4.6 -8" align="center" color="#f0e6d3" width="7">
+    </a-text>
+
+    <!-- ============= CAMERA ============= -->
+    <a-camera position="0 1.6 2" look-controls wasd-controls>
+      <a-cursor color="#ffdd88" fuse="false"></a-cursor>
+    </a-camera>
+
+  </a-scene>
+
+  <script>
+    // ── Auto-scale: fits any GLB to a target height automatically ──────────────
+    // This handles models exported in mm, cm, or m — no manual scale guessing needed.
+    function autoScale(el, targetHeight) {
+      el.addEventListener('model-loaded', () => {
+        const mesh = el.getObject3D('mesh');
+        if (!mesh) return;
+        const box = new AFRAME.THREE.Box3().setFromObject(mesh);
+        const size = new AFRAME.THREE.Vector3();
+        box.getSize(size);
+        if (size.y === 0) return;
+        const factor = targetHeight / size.y;
+        el.setAttribute('scale', `${factor} ${factor} ${factor}`);
+        console.log(`✅ ${el.id} loaded — auto-scaled ×${factor.toFixed(4)}`);
+      });
+    }
+
+    // Human → 1.8 m tall
+    const humanEl = document.querySelector('#humanModel');
+    autoScale(humanEl, 1.8);
+
+    humanEl.addEventListener('model-error', () => {
+      console.warn('⚠️ Human model not found. Check: t-pose_cleaned_male_scan.glb is in the same folder and you are using a local server (not file://)');
+      // Draw a simple fallback mannequin
+      const scene = document.querySelector('a-scene');
+      const fb = document.createElement('a-entity');
+      fb.setAttribute('position', '3 -1 -4.5');
+      fb.innerHTML = `
+        <a-sphere position="0 2.7 0"    radius="0.22"                           color="#f5cba7"></a-sphere>
+        <a-box    position="0 1.8 0"    width="0.55" height="0.9"  depth="0.3"  color="#888"></a-box>
+        <a-box    position="-0.4 1.75 0" width="0.18" height="0.8" depth="0.18" color="#888" rotation="0 0 15"></a-box>
+        <a-box    position="0.4 1.75 0"  width="0.18" height="0.8" depth="0.18" color="#888" rotation="0 0 -15"></a-box>
+        <a-box    position="-0.18 0.85 0" width="0.22" height="0.9" depth="0.22" color="#555"></a-box>
+        <a-box    position="0.18 0.85 0"  width="0.22" height="0.9" depth="0.22" color="#555"></a-box>
+      `;
+      scene.appendChild(fb);
+      document.querySelector('a-text[value="Model Preview"]')
+        ?.setAttribute('value', 'Model Preview\n(glb missing — use local server)');
+    });
+
+    // Clothing items → 1.0 m tall for rack display
+    ['greenShirtModel', 'yellowPoloModel', 'pantModel'].forEach(id => {
+      const el = document.querySelector(`#${id}`);
+      if (el) {
+        autoScale(el, 1.0);
+        el.addEventListener('model-error', () =>
+          console.warn(`⚠️ ${id} GLB not found — check filename`)
+        );
+      }
+    });
+
+    // Video autoplay fallback
+    window.addEventListener('load', () => {
+      const vid = document.querySelector('#tryOnVideo');
+      if (vid && vid.src) vid.play().catch(e => console.warn('Video blocked:', e));
+    });
+  </script>
+</body>
+</html>
